@@ -1,0 +1,52 @@
+{
+  "TableName": "Students",
+  "BillingMode": "PROVISIONED",
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 12000,
+    "WriteCapacityUnits": 4000
+  },
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "student_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "major",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "student_id",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "major-index",
+      "KeySchema": [
+        {
+          "AttributeName": "major",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 12000,
+        "WriteCapacityUnits": 4000
+      }
+    }
+  ],
+  "Tags": [
+    {
+      "Key": "Project",
+      "Value": "StudentManagement"
+    },
+    {
+      "Key": "Owner",
+      "Value": "24110219-24110281"
+    }
+  ]
+}
