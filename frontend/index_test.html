@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Sinh viên Serverless - Full CRUD</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .form-group { margin-bottom: 10px; }
+        input { padding: 8px; width: 190px; margin-right: 5px; }
+        button { padding: 8px 15px; cursor: pointer; border: none; color: white; font-weight: bold; border-radius: 4px;}
+        .btn-add { background: #28a745; }
+        .btn-update { background: #ff9900; display: none; }
+        .btn-edit { background: #007bff; padding: 5px 10px; margin-right: 5px; }
+        .btn-delete { background: #dc3545; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Quản Lý Hồ Sơ Sinh Viên</h2>
+    
+    <!-- Form nhập liệu chung cho cả Thêm và Sửa -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+        <div class="form-group">
+            <input type="text" id="student_id" placeholder="Mã số SV (VD: 24129018)">
+            <input type="text" id="full_name" placeholder="Họ và tên">
+        </div>
+        <div class="form-group">
+            <input type="text" id="major" placeholder="Chuyên ngành (VD: IT)">
+            <input type="number" id="gpa" placeholder="Điểm GPA (VD: 3.5)" step="0.1">
+        </div>
+        <button id="btn-add" class="btn-add" onclick="addStudent()">Them Sinh Vien</button>
+        <button id="btn-update" class="btn-update" onclick="submitUpdate()">Luu Cap Nhat</button>
+        <button id="btn-cancel" class="btn-update" style="background: #6c757d;" onclick="resetForm()">Huy</button>
+    </div>
+
+    <button onclick="loadStudents()" style="background: #17a2b8; margin-top: 20px;">Lam moi danh sach</button>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>MSSV</th>
+                <th>Ho Ten</th>
+                <th>Nganh</th>
+                <th>GPA</th>
+                <th>Thao tac</th>
+            </tr>
+        </thead>
+        <tbody id="student-table-body">
+            <!-- Dữ liệu render từ API -->
+        </tbody>
+    </table>
+
+    <script>
+        // API GATEWAY
+        const API_URL = "";
+
+        async function loadStudents() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                const tbody = document.getElementById('student-table-body');
+                tbody.innerHTML = ""; 
+
+                data.forEach(student => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${student.student_id}</td>
+                            <td>${student.full_name || 'N/A'}</td>
+                            <td>${student.major}</td>
+                            <td>${student.gpa}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editStudent('${student.student_id}', '${student.full_name}', '${student.major}', ${student.gpa})">Sua</button>
+                                <button class="btn-delete" onclick="deleteStudent('${student.student_id}')">Xoa</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Không thể tải danh sách. Vui lòng kiểm tra lại cấu hình CORS trên API Gateway.");
+            }
+        }
+
+        async function addStudent() {
+            const student = {
+                student_id: document.getElementById('student_id').value,
+                full_name: document.getElementById('full_name').value,
+                major: document.getElementById('major').value,
+                gpa: parseFloat(document.getElementById('gpa').value),
+                is_active: true
+            };
+
+            if(!student.student_id) return alert("Vui lòng nhập MSSV!");
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(student)
+                });
+                if(response.ok) {
+                    alert("Đã thêm thành công!");
+                    resetForm();
+                    loadStudents();
+                } else {
+                    alert("Có lỗi xảy ra khi thêm dữ liệu.");
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function editStudent(id, name, major, gpa) {
+            document.getElementById('student_id').value = id;
+            document.getElementById('student_id').disabled = true; // Khóa không cho sửa ID
+            document.getElementById('full_name').value = name !== 'undefined' ? name : '';
+            document.getElementById('major').value = major !== 'undefined' ? major : '';
+            document.getElementById('gpa').value = gpa !== 'undefined' ? gpa : '';
+
+
+            document.getElementById('btn-add').style.display = 'none';
+            document.getElementById('btn-update').style.display = 'inline-block';
+            document.getElementById('btn-cancel').style.display = 'inline-block';
+        }
+
+        async function submitUpdate() {
+            const student = {
+                student_id: document.getElementById('student_id').value,
+                full_name: document.getElementById('full_name').value,
+                major: document.getElementById('major').value,
+                gpa: parseFloat(document.getElementById('gpa').value),
+                is_active: true
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    body: JSON.stringify(student)
+                });
+                if(response.ok) {
+                    alert("Cập nhật thành công!");
+                    resetForm();
+                    loadStudents();
+                } else {
+                    alert("Có lỗi xảy ra khi cập nhật.");
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function deleteStudent(id) {
+            if(!confirm("Bạn có chắc chắn muốn xóa sinh viên " + id + "?")) return;
+
+            try {
+                const response = await fetch(API_URL + "?student_id=" + id, {
+                    method: 'DELETE'
+                });
+                if(response.ok) {
+                    alert("Đã xóa thành công!");
+                    loadStudents();
+                } else {
+                    alert("Có lỗi xảy ra khi xóa.");
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function resetForm() {
+            document.getElementById('student_id').value = '';
+            document.getElementById('student_id').disabled = false;
+            document.getElementById('full_name').value = '';
+            document.getElementById('major').value = '';
+            document.getElementById('gpa').value = '';
+            
+            document.getElementById('btn-add').style.display = 'inline-block';
+            document.getElementById('btn-update').style.display = 'none';
+            document.getElementById('btn-cancel').style.display = 'none';
+        }
+
+        window.onload = loadStudents;
+    </script>
+</body>
+</html>
