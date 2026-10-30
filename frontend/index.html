@@ -201,9 +201,10 @@
         <div class="card-head">
             <h2>Danh sách sinh viên</h2>
             <div class="filter">
+                <input type="text" id="filter_student_id" placeholder="Tìm theo MSSV" onkeydown="if(event.key==='Enter')loadStudents()">
                 <input type="text" id="filter_major" placeholder="Lọc theo ngành (VD: IT)" onkeydown="if(event.key==='Enter')loadStudents()">
                 <button onclick="loadStudents()" class="btn-refresh">Tải / Lọc</button>
-                <button onclick="document.getElementById('filter_major').value='';loadStudents()" class="btn-refresh">Xóa lọc</button>
+                <button onclick="document.getElementById('filter_student_id').value='';document.getElementById('filter_major').value='';loadStudents()" class="btn-refresh">Xóa lọc</button>
             </div>
         </div>
         <div class="table-scroll">
@@ -322,18 +323,25 @@
         if (!apiUrl) return;
 
         try {
+            const studentId = document.getElementById('filter_student_id').value.trim();
             const major = document.getElementById('filter_major').value.trim();
-            const getUrl = major ? apiUrl + (apiUrl.includes('?') ? '&' : '?') + 'major=' + encodeURIComponent(major) : apiUrl;
+            const sep = apiUrl.includes('?') ? '&' : '?';
+            const getUrl = studentId
+                ? apiUrl + sep + 'student_id=' + encodeURIComponent(studentId)
+                : (major ? apiUrl + sep + 'major=' + encodeURIComponent(major) : apiUrl);
             const response = await apiFetch(getUrl, {
                 method: 'GET',
                 headers: getHeaders()
             });
 
+            const raw = await response.json();
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errMsg = raw.error || raw.message || `Lỗi ${response.status}`;
+                notify(errMsg, 'error');
+                return;
             }
 
-            const raw = await response.json();
             const data = Array.isArray(raw) ? raw : (raw && raw.student_id ? [raw] : []);
 
             const tbody = document.getElementById('student-table-body');
