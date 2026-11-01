@@ -31,25 +31,47 @@ Hệ thống hoạt động theo mô hình Serverless hoàn toàn, tối ưu chi
 ## Cấu trúc thư mục dự án
 
 ```text
-student-management/
-├── backend/                        # Mã nguồn các hàm AWS Lambda & cấu hình API Gateway
-├── frontend/                       # Mã nguồn giao diện Web tĩnh lưu trữ trên S3
-├── infrastructure/                 # Cấu hình hạ tầng AWS (IaC / JSON Template)
-│   ├── dynamodb/
-│   │   ├── table.json              # Định nghĩa bảng DynamoDB Students & GSI major-index
-│   │   └── example_values.json     # Dữ liệu mẫu kiểm thử
-│   └── s3/
-│       └── bucket_policy.json      # S3 Bucket Policy cấp quyền đọc public cho website
-├── docs/                           # Tài liệu kỹ thuật, báo cáo & minh chứng
+.
+├── backend/
+│   ├── create_student.py
+│   ├── delete_student.py
+│   ├── get_students.py
+│   └── update_student.py
+├── docs/
 │   ├── architecture/
-│   │   └── project_architecture.png# Sơ đồ kiến trúc Serverless
+│   │   └── project_architecture.png
+│   ├── demo_videos/
+│   │   └── demo_project_video.mp4
 │   ├── reports/
-│   │   └── week1-report.md         # Báo cáo kết quả Tuần 1
+│   │   ├── project-report.pdf
+│   │   ├── week1-report.md
+│   │   ├── week2-report.md
+│   │   ├── week3-report.md
+│   │   └── week4-report.md
 │   └── screenshots/
-│       └── week1/                  # Ảnh chụp minh chứng thao tác trên AWS Console
-├── worklogs/                       # Nhật ký phân công và tiến độ công việc
-│   └── week1-worklog.md            # Nhật ký phân công Tuần 1
-└── README.md
+│       ├── week1/
+│       ├── week2/
+│       ├── week3/
+│       └── week4/
+├── frontend/
+│   ├── index.html
+│   └── index_test.html
+├── infrastructure/
+│   ├── api-gateway/
+│   │   ├── access-log-format.json
+│   │   └── openapi.yaml
+│   ├── cloudwatch/
+│   ├── dynamodb/
+│   │   ├── example_values.json
+│   │   └── table.json
+│   ├── iam/
+│   └── s3/
+│       └── bucket_policy.json
+└── worklogs/
+    ├── week1-worklog.md
+    ├── week2-worklog.md
+    ├── week3-worklog.md
+    └── week4-worklog.md
 ```
 
 ---
@@ -59,6 +81,10 @@ student-management/
 | Tuần | Nội dung công việc chính | Báo cáo chi tiết | Nhật ký công việc (Worklog) |
 | :---: | :--- | :---: | :---: |
 | **Tuần 1** | Tìm hiểu dịch vụ AWS, thiết kế kiến trúc, khởi tạo S3 Bucket & bảng DynamoDB | [week1-report.md](docs/reports/week1-report.md) | [week1-worklog.md](worklogs/week1-worklog.md) |
-| **Tuần 2** |  |  |
-| **Tuần 3** |  |  |
-| **Tuần 4** |  |  |
+| **Tuần 2** | Triển khai AWS Lambda với API Gateway, thử nghiệm trên file index_test.html độc lập | [week2-report.md](docs/reports/week2-report.md) | [week2-worklog.md](worklogs/week2-worklog.md) |
+| **Tuần 3** | Nâng cao bảo mật cho API Gateway bằng cách bắt buộc sử dụng API Key, tạo và liên kết Usage Plan với API Key, triển khai ứng dụng Web lên Amazon S3 dưới dạng Static Website và thực hiện kiểm thử End-to-End trực tiếp trên môi trường Cloud | [week3-report.md](docs/reports/week3-report.md) | [week3-worklog.md](worklogs/week3-worklog.md) |
+| **Tuần 4** | Quay video demo, viết báo cáo, dọn dẹp tài nguyên hệ thống | [week4-report.md](docs/reports/week4-report.md) | [week4-worklog.md](worklogs/week4-worklog.md) |
+
+## Kết quả thu được  
+* **Báo cáo dự án**: [project-report.pdf](docs/reports/project-report.pdf)
+* **Video demo**: [demo_project_video.mp4](docs/demo_videos/demo_project_video.mp4)
