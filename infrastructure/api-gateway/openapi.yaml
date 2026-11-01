@@ -1,0 +1,283 @@
+openapi: "3.0.1"
+info:
+  title: "StudentAPI"
+  version: "1.0.0"
+  description: "API quản lý thông tin sinh viên."
+servers:
+  - url: "https://7zwci01cq7.execute-api.us-east-1.amazonaws.com/{basePath}"
+    variables:
+      basePath:
+        default: "dev"
+paths:
+  /students:
+    get:
+      summary: "Lấy danh sách hoặc thông tin sinh viên"
+      description: "Có thể lọc theo student_id hoặc major. Nếu không truyền tham số, trả về toàn bộ danh sách."
+      parameters:
+        - name: student_id
+          in: query
+          required: false
+          description: "Mã sinh viên cần tra cứu."
+          schema:
+            type: string
+        - name: major
+          in: query
+          required: false
+          description: "Chuyên ngành cần lọc."
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Trả về một sinh viên hoặc danh sách sinh viên."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Student"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/Student"
+        "400":
+          description: "Tham số truy vấn không hợp lệ."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Không tìm thấy sinh viên."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Lỗi hệ thống."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - api_key: []
+    post:
+      summary: "Tạo sinh viên"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStudent"
+      responses:
+        "201":
+          description: "Tạo sinh viên thành công."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: "Thiếu dữ liệu bắt buộc hoặc dữ liệu không hợp lệ."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: "Mã sinh viên đã tồn tại."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Lỗi hệ thống."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - api_key: []
+    put:
+      summary: "Cập nhật thông tin sinh viên"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudent"
+      responses:
+        "200":
+          description: "Cập nhật sinh viên thành công."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: "Thiếu mã sinh viên hoặc dữ liệu cập nhật không hợp lệ."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Không tìm thấy sinh viên cần cập nhật."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Lỗi hệ thống."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - api_key: []
+    delete:
+      summary: "Xóa sinh viên"
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          description: "Mã sinh viên cần xóa."
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Xóa sinh viên thành công."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: "Thiếu mã sinh viên."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Không tìm thấy sinh viên cần xóa."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Lỗi hệ thống."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - api_key: []
+    options:
+      summary: "Kiểm tra CORS preflight"
+      responses:
+        "200":
+          description: "Phản hồi preflight CORS."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+components:
+  schemas:
+    StudentFields:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: "Họ và tên sinh viên."
+        major:
+          type: string
+          description: "Chuyên ngành."
+        email:
+          type: string
+          format: email
+        birth_day:
+          type: string
+          format: date
+        gpa:
+          type: number
+          minimum: 0
+          maximum: 4
+        is_active:
+          type: boolean
+    Student:
+      allOf:
+        - $ref: "#/components/schemas/StudentFields"
+        - type: object
+          required:
+            - student_id
+            - full_name
+            - major
+          properties:
+            student_id:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+              readOnly: true
+            updated_at:
+              type: string
+              format: date-time
+              readOnly: true
+    CreateStudent:
+      allOf:
+        - $ref: "#/components/schemas/StudentFields"
+        - type: object
+          required:
+            - student_id
+            - full_name
+            - major
+          properties:
+            student_id:
+              type: string
+              minLength: 1
+    UpdateStudent:
+      allOf:
+        - $ref: "#/components/schemas/StudentFields"
+        - type: object
+          required:
+            - student_id
+          minProperties: 2
+          properties:
+            student_id:
+              type: string
+              minLength: 1
+    SuccessResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        student_id:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: x-api-key
+      in: header
+x-amazon-apigateway-security-policy: "TLS_1_2"
